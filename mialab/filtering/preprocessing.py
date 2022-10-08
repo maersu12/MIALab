@@ -4,6 +4,7 @@ Image pre-processing aims to improve the image quality (image intensities) for s
 """
 import warnings
 
+import numpy as np
 import pymia.filtering.filter as pymia_fltr
 import SimpleITK as sitk
 
@@ -27,9 +28,9 @@ class ImageNormalization(pymia_fltr.Filter):
         """
 
         img_arr = sitk.GetArrayFromImage(image)
-
         # todo: normalize the image using numpy
-        warnings.warn('No normalization implemented. Returning unprocessed image.')
+        img_arr = (img_arr-np.mean(img_arr))/np.std(img_arr)
+        #warnings.warn('No normalization implemented. Returning unprocessed image.')
 
         img_out = sitk.GetImageFromArray(img_arr)
         img_out.CopyInformation(image)
@@ -78,7 +79,8 @@ class SkullStripping(pymia_fltr.Filter):
         mask = params.img_mask  # the brain mask
 
         # todo: remove the skull from the image by using the brain mask
-        warnings.warn('No skull-stripping implemented. Returning unprocessed image.')
+        image = sitk.Mask(image, mask)
+        #warnings.warn('No skull-stripping implemented. Returning unprocessed image.')
 
         return image
 
@@ -128,7 +130,8 @@ class ImageRegistration(pymia_fltr.Filter):
 
         # todo: replace this filter by a registration. Registration can be costly, therefore, we provide you the
         # transformation, which you only need to apply to the image!
-        warnings.warn('No registration implemented. Returning unregistered image')
+        image = sitk.Resample(image, params.transformation)
+        #warnings.warn('No registration implemented. Returning unregistered image')
 
         atlas = params.atlas
         transform = params.transformation
